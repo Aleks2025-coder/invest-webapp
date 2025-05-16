@@ -1,63 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Инвестиции</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Инвестирование</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    .package {
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .package h3 {
-      margin: 0 0 10px;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
     button {
-      background-color: #2cab37;
+      display: block;
+      width: 90%;
+      margin: 10px auto;
+      padding: 14px;
+      font-size: 18px;
+      background-color: #4CAF50;
       color: white;
       border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <h2>Выберите инвестиционный пакет</h2>
-  <div id="packages"></div>
+  <button onclick="select(100)">Инвестировать $100</button>
+  <button onclick="select(200)">Инвестировать $200</button>
+  <button onclick="select(500)">Инвестировать $500</button>
+  <button onclick="select(1000)">Инвестировать $1000</button>
+  <button onclick="select(5000)">Инвестировать $5000</button>
+  <button style="background-color: gray;" onclick="confirm()">✅ Я оплатил</button>
 
   <script>
-    const packages = [100, 200, 500, 1000, 5000];
-    const container = document.getElementById('packages');
-    const walletBase = "https://t.me/wallet?start=send_"; // Заменить, если есть кастом
+    let tg = window.Telegram.WebApp;
+    let selectedAmount = null;
 
-    packages.forEach(amount => {
-      const div = document.createElement('div');
-      div.className = "package";
-      div.innerHTML = `
-        <h3>Пакет: $${amount}</h3>
-        <p>Оплата через Telegram Wallet в USDT</p>
-        <button onclick="pay(${amount})">Оплатить</button>
-      `;
-      container.appendChild(div);
-    });
-
-    function pay(amount) {
-      const url = `${walletBase}${amount}_USDT`; // Структура зависит от платформы
-      window.open(url, '_blank');
+    function select(amount) {
+      selectedAmount = amount;
+      window.open(`https://t.me/wallet?startapp=${amount}`, "_blank");
     }
 
-    Telegram.WebApp.ready();
+    function confirm() {
+      if (!selectedAmount) {
+        alert("Сначала выберите и оплатите пакет");
+        return;
+      }
+      tg.sendData(JSON.stringify({ investment: selectedAmount }));
+      tg.close();
+    }
+
+    tg.expand();
   </script>
 </body>
 </html>
