@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Инвестиционные Пакеты</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .package {
+      background: white;
+      margin: 15px auto;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .amount {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+
+    button {
+      background-color: #28a745;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>Выберите инвестиционный пакет</h1>
+
+  <div class="package">
+    <div class="amount">Пакет: $100</div>
+    <button onclick="pay(100)">Оплатить USDT</button>
+  </div>
+
+  <div class="package">
+    <div class="amount">Пакет: $200</div>
+    <button onclick="pay(200)">Оплатить USDT</button>
+  </div>
+
+  <div class="package">
+    <div class="amount">Пакет: $500</div>
+    <button onclick="pay(500)">Оплатить USDT</button>
+  </div>
+
+  <div class="package">
+    <div class="amount">Пакет: $1000</div>
+    <button onclick="pay(1000)">Оплатить USDT</button>
+  </div>
+
+  <div class="package">
+    <div class="amount">Пакет: $5000</div>
+    <button onclick="pay(5000)">Оплатить USDT</button>
+  </div>
+
+  <script>
+    function pay(amount) {
+      alert(`Переход к оплате пакета на $${amount} через Telegram Wallet...`);
+      // Здесь можно интегрировать telegram.payment или redirect
+    }
+  </script>
+</body>
+</html>
