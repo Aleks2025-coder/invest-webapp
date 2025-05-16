@@ -84,15 +84,30 @@
     <button class="btn" onclick="confirmPayment()">Я оплатил</button>
   </div>
 
+  <!-- Подключаем Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
+    let selectedAmount = 100;
+
     function selectPackage(amount) {
+      selectedAmount = amount;
       document.getElementById("amount").innerText = amount;
       document.getElementById("pay-section").style.display = "block";
     }
 
     function confirmPayment() {
-      alert("Спасибо! Мы проверим поступление средств и активируем ваш пакет.");
-      // В реальном проекте здесь можно отправить сообщение боту
+      const tg = window.Telegram.WebApp;
+      const data = {
+        action: "payment_confirmed",
+        amount: selectedAmount
+      };
+
+      if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(data));
+        tg.close();
+      } else {
+        alert("Ошибка: Telegram WebApp не инициализирован.");
+      }
     }
   </script>
 </body>
