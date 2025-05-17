@@ -88,27 +88,46 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     let selectedAmount = 100;
+    const tg = window.Telegram.WebApp;
+
+    // Инициализация WebApp
+    tg.expand();
+    tg.enableClosingConfirmation();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => tg.close());
 
     function selectPackage(amount) {
       selectedAmount = amount;
       document.getElementById("amount").innerText = amount;
       document.getElementById("pay-section").style.display = "block";
+      window.scrollTo(0, document.body.scrollHeight);
     }
 
-    function confirmPayment() {
-      const tg = window.Telegram.WebApp;
-      const data = {
-        action: "payment_confirmed",
-        amount: selectedAmount
-      };
+    async function confirmPayment() {
+      try {
+        if (!tg || !tg.sendData) {
+          throw new Error("Telegram WebApp не инициализирован");
+        }
 
-      if (tg && tg.sendData) {
-        tg.sendData(JSON.stringify(data));
+        const paymentData = {
+          action: "payment_confirmed",
+          amount: selectedAmount,
+          currency: "USDT",
+          date: new Date().toISOString(),
+          user_id: tg.initDataUnsafe.user?.id
+        };
+
+        tg.sendData(JSON.stringify(paymentData));
+        
+        // Даем время на отправку данных перед закрытием
+        await new Promise(resolve => setTimeout(resolve, 300));
         tg.close();
-      } else {
-        alert("Ошибка: Telegram WebApp не инициализирован.");
+        
+      } catch (error) {
+        alert(`Ошибка: ${error.message}`);
+        console.error("Payment error:", error);
       }
     }
-  </script>
+</script>
 </body>
 </html>
