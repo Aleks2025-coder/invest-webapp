@@ -61,6 +61,11 @@
       margin-top: 15px;
       width: 180px;
     }
+    #error-message {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -82,52 +87,107 @@
     <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?data=TRXabc12345xyz&size=200x200" alt="QR" />
     <br />
     <button class="btn" onclick="confirmPayment()">Я оплатил</button>
+    <div id="error-message"></div>
   </div>
 
   <!-- Подключаем Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
+    // Глобальные переменные
     let selectedAmount = 100;
     const tg = window.Telegram.WebApp;
+    const errorElement = document.getElementById('error-message');
 
     // Инициализация WebApp
-    tg.expand();
-    tg.enableClosingConfirmation();
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => tg.close());
+    function initWebApp() {
+      if (!tg) {
+        showError("Telegram WebApp не доступен");
+        return;
+      }
 
-    function selectPackage(amount) {
-      selectedAmount = amount;
-      document.getElementById("amount").innerText = amount;
-      document.getElementById("pay-section").style.display = "block";
-      window.scrollTo(0, document.body.scrollHeight);
+      tg.ready();
+      tg.expand();
+      tg.enableClosingConfirmation();
+
+      // Кнопка "Назад"
+      tg.BackButton.show();
+      tg.BackButton.onClick(() => {
+        document.getElementById('pay-section').style.display = 'none';
+        tg.BackButton.hide();
+      });
+
+      console.log("WebApp инициализирован");
     }
 
+    // Показ ошибок
+    function showError(message) {
+      console.error(message);
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+
+    // Выбор пакета
+    function selectPackage(amount) {
+      try {
+        selectedAmount = amount;
+        document.getElementById("amount").innerText = amount;
+        document.getElementById("pay-section").style.display = "block";
+        errorElement.style.display = 'none';
+        window.scrollTo(0, document.body.scrollHeight);
+
+        // Показываем кнопку "Назад"
+        if (tg?.BackButton?.show) {
+          tg.BackButton.show();
+        }
+      } catch (e) {
+        showError("Ошибка при выборе пакета");
+        console.error(e);
+      }
+    }
+
+    // Подтверждение платежа
     async function confirmPayment() {
       try {
+        errorElement.style.display = 'none';
+
         if (!tg || !tg.sendData) {
-          throw new Error("Telegram WebApp не инициализирован");
+          throw new Error("Не удалось подключиться к Telegram");
         }
 
         const paymentData = {
           action: "payment_confirmed",
           amount: selectedAmount,
           currency: "USDT",
-          date: new Date().toISOString(),
-          user_id: tg.initDataUnsafe.user?.id
+          timestamp: new Date().toISOString(),
+          user_id: tg.initDataUnsafe.user?.id || "unknown",
+          wallet: document.getElementById("wallet").innerText
         };
 
+        console.log("Отправка данных:", paymentData);
+
+        // Отправка данных в Telegram
         tg.sendData(JSON.stringify(paymentData));
-        
+
         // Даем время на отправку данных перед закрытием
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         tg.close();
-        
+
       } catch (error) {
-        alert(`Ошибка: ${error.message}`);
+        const errorMsg = `Ошибка: ${error.message}`;
+        showError(errorMsg);
         console.error("Payment error:", error);
+
+        // Пытаемся показать alert через Telegram или обычный alert
+        if (tg?.showAlert) {
+          tg.showAlert(errorMsg);
+        } else {
+          alert(errorMsg);
+        }
       }
     }
-</script>
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', initWebApp);
+  </script>
 </body>
 </html>
